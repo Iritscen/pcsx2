@@ -17,6 +17,7 @@
 #include "App.h"
 #include "AppSaveStates.h"
 #include "ConsoleLogger.h"
+#include "MainFrame.h"
 
 #include "Common.h"
 
@@ -29,15 +30,6 @@
 
 static int StatesC = 0;
 static const int StateSlotsCount = 10;
-static wxMenuItem* g_loadBackupMenuItem =NULL;
-
-bool States_isSlotUsed(int num)
-{
-	if (ElfCRC == 0)
-		return false;
-	else
-		return wxFileExists( SaveStateBase::GetFilename( num ) );
-}
 
 // FIXME : Use of the IsSavingOrLoading flag is mostly a hack until we implement a
 // complete thread to manage queuing savestate tasks, and zipping states to disk.  --air
@@ -62,42 +54,42 @@ protected:
 	}
 };
 
-void Sstates_updateLoadBackupMenuItem( bool isBeforeSave = false);
+void Sstates_updateLoadBackupMenuItem(bool isBeforeSave = false);
 
 void States_FreezeCurrentSlot()
 {
 	// FIXME : Use of the IsSavingOrLoading flag is mostly a hack until we implement a
 	// complete thread to manage queuing savestate tasks, and zipping states to disk.  --air
-	if( !SysHasValidState() )
+	if (!SysHasValidState())
 	{
-		Console.WriteLn( "Save state: Aborting (VM is not active)." );
+		Console.WriteLn("Save state: Aborting (VM is not active).");
 		return;
 	}
 
-	if( wxGetApp().HasPendingSaves() || IsSavingOrLoading.exchange(true) )
+	if (wxGetApp().HasPendingSaves() || IsSavingOrLoading.exchange(true))
 	{
-		Console.WriteLn( "Load or save action is already pending." );
+		Console.WriteLn("Load or save action is already pending.");
 		return;
 	}
-	Sstates_updateLoadBackupMenuItem( true );
+	Sstates_updateLoadBackupMenuItem(true);
 
-	GSchangeSaveState( StatesC, SaveStateBase::GetFilename( StatesC ).ToUTF8() );
+	GSchangeSaveState(StatesC, SaveStateBase::GetFilename( StatesC ).ToUTF8());
 	StateCopy_SaveToSlot( StatesC );
 	
-	GetSysExecutorThread().PostIdleEvent( SysExecEvent_ClearSavingLoadingFlag() );
+	GetSysExecutorThread().PostIdleEvent(SysExecEvent_ClearSavingLoadingFlag());
 }
 
-void _States_DefrostCurrentSlot( bool isFromBackup )
+void _States_DefrostCurrentSlot(bool isFromBackup)
 {
-	if( !SysHasValidState() )
+	if (!SysHasValidState())
 	{
-		Console.WriteLn( "Load state: Aborting (VM is not active)." );
+		Console.WriteLn("Load state: Aborting (VM is not active).");
 		return;
 	}
 
-	if( IsSavingOrLoading.exchange(true) )
+	if (IsSavingOrLoading.exchange(true))
 	{
-		Console.WriteLn( "Load or save action is already pending." );
+		Console.WriteLn("Load or save action is already pending.");
 		return;
 	}
 
@@ -107,29 +99,38 @@ void _States_DefrostCurrentSlot( bool isFromBackup )
 	GetSysExecutorThread().PostIdleEvent( SysExecEvent_ClearSavingLoadingFlag() );
 
 	Sstates_updateLoadBackupMenuItem();
+	UI_UpdateSysControls();
 }
 
 void States_DefrostCurrentSlot()
 {
-	_States_DefrostCurrentSlot( false );
+	_States_DefrostCurrentSlot(false);
 }
 
 void States_DefrostCurrentSlotBackup()
 {
-	_States_DefrostCurrentSlot( true );
+	_States_DefrostCurrentSlot(true);
 }
 
-
-void States_registerLoadBackupMenuItem( wxMenuItem* loadBackupMenuItem )
+void Sstates_updateLoadBackupMenuItem(bool isBeforeSave)
 {
-	g_loadBackupMenuItem = loadBackupMenuItem;
+	int slot = States_GetCurrentSlot();
+	wxString file = SaveStateBase::GetFilename(slot);
+
+	if (!(isBeforeSave && g_Conf->EmuOptions.BackupSavestate))
+	{
+		file = file + L".backup";
+	}
+
+	sMainFrame.EnableMenuItem(MenuId_State_LoadBackup, wxFileExists(file));
+	sMainFrame.SetMenuItemLabel(MenuId_State_LoadBackup, wxsFormat(L"%s %d", _("Backup"), slot));
 }
 
 static void OnSlotChanged()
 {
-	OSDlog( Color_StrongGreen, true, " > Selected savestate slot %d", StatesC );
+	OSDlog(Color_StrongGreen, true, " > Selected savestate slot %d", StatesC);
 
-	if( GSchangeSaveState != NULL )
+	if (GSchangeSaveState != NULL)
 		GSchangeSaveState(StatesC, SaveStateBase::GetFilename(StatesC).utf8_str());
 
 	Sstates_updateLoadBackupMenuItem();
@@ -140,21 +141,9 @@ int States_GetCurrentSlot()
 	return StatesC;
 }
 
-void Sstates_updateLoadBackupMenuItem( bool isBeforeSave )
+void States_SetCurrentSlot(int slot)
 {
-	if( !g_loadBackupMenuItem )	return;
-
-	int slot = States_GetCurrentSlot();
-	wxString file = SaveStateBase::GetFilename( slot );
-	g_loadBackupMenuItem->Enable( wxFileExists( isBeforeSave && g_Conf->EmuOptions.BackupSavestate ? file : file + L".backup" ) );
-	wxString label;
-	label.Printf(L"%s %d", _("Backup"), slot );
-	g_loadBackupMenuItem->SetItemLabel( label );
-}
-
-void States_SetCurrentSlot( int slot )
-{
-	StatesC = std::min( std::max( slot, 0 ), StateSlotsCount );
+	StatesC = std::min(std::max(slot, 0), StateSlotsCount);
 	OnSlotChanged();
 }
 

@@ -36,15 +36,17 @@ wxMenu* MainEmuFrame::MakeStatesSubMenu( int baseid, int loadBackupId ) const
 
 	for (int i = 0; i < 10; i++)
 	{
-		mnuSubstates->Append( baseid+i+1, wxsFormat(_("Slot %d"), i) );
+		// Will be changed once an iso is loaded.
+		mnuSubstates->Append(baseid + i + 1, wxsFormat(_("Slot %d"), i));
 	}
-	if( loadBackupId>=0 )
+
+	if (loadBackupId >= 0)
 	{
 		mnuSubstates->AppendSeparator();
 
-		wxMenuItem* m = mnuSubstates->Append( loadBackupId,	_("Backup") );
+		wxMenuItem* m = mnuSubstates->Append(loadBackupId, _("Backup"));
 		m->Enable( false );
-		States_registerLoadBackupMenuItem( m );
+		//States_registerLoadBackupMenuItem(m);
 	}
 
 	//mnuSubstates->Append( baseid - 1,	_("Other...") );

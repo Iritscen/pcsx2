@@ -28,14 +28,44 @@
 // mojo for configurable/dynamic menus. >_<
 void MainEmuFrame::EnableMenuItem( int id, bool enable )
 {
-	if( wxMenuItem* item = m_menubar.FindItem(id) )
-		item->Enable( enable );
+	if (wxMenuItem* item = m_menubar.FindItem(id))
+		item->Enable(enable);
+}
+
+void MainEmuFrame::SetMenuItemLabel(int id, wxString str)
+{
+	if (wxMenuItem* item = m_menubar.FindItem(id))
+		item->SetItemLabel(str);
 }
 
 static void _SaveLoadStuff( bool enabled )
 {
 	sMainFrame.EnableMenuItem( MenuId_Sys_LoadStates, enabled );
 	sMainFrame.EnableMenuItem( MenuId_Sys_SaveStates, enabled );
+
+	// Give us the actual date and time of the save in the slot, or empty if it is empty. And you can't load empty slots.
+	for (int i = 0; i < 10; i++)
+	{
+		int load_menu_item = MenuId_State_Load01 + i + 1;
+		int save_menu_item = MenuId_State_Save01 + i + 1;
+		if (SaveStateBase::isSlotUsed(i))
+		{
+			wxDateTime date_saved = SaveStateBase::GetSlotTimestamp(i);
+			sMainFrame.EnableMenuItem(load_menu_item, true);
+			sMainFrame.SetMenuItemLabel(load_menu_item, wxsFormat(_("Slot %d - %s %s"), i, date_saved.FormatDate(), date_saved.FormatTime()));
+
+			sMainFrame.EnableMenuItem(save_menu_item, true);
+			sMainFrame.SetMenuItemLabel(save_menu_item, wxsFormat(_("Slot %d - %s %s"), i, date_saved.FormatDate(), date_saved.FormatTime()));
+		}
+		else
+		{
+			sMainFrame.EnableMenuItem(load_menu_item, false);
+			sMainFrame.SetMenuItemLabel(load_menu_item,wxsFormat(_("Slot %d - Empty"), i));
+
+			sMainFrame.EnableMenuItem(save_menu_item, true);
+			sMainFrame.SetMenuItemLabel(save_menu_item,wxsFormat(_("Slot %d - Empty"), i));
+		}
+	}
 }
 
 // Updates the enable/disable status of all System related controls: menus, toolbars,
