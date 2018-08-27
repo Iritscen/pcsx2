@@ -214,6 +214,7 @@ wxWindowID SwapOrReset_CdvdSrc( wxWindow* owner, CDVD_SourceType newsrc )
 		//CoreThread.ChangeCdvdSource();
 		sMainFrame.UpdateIsoSrcSelection();
 		core.AllowResume();
+		Saveslots_UpdateFromDisk();
 	}
 	else
 	{
@@ -520,14 +521,12 @@ void MainEmuFrame::Menu_LoadStates_Click(wxCommandEvent &event)
 
 	States_SetCurrentSlot( event.GetId() - MenuId_State_Load01 - 1 );
 	States_DefrostCurrentSlot();
-	UI_UpdateSysControls();
 }
 
 void MainEmuFrame::Menu_SaveStates_Click(wxCommandEvent &event)
 {
 	States_SetCurrentSlot( event.GetId() - MenuId_State_Save01 - 1 );
 	States_FreezeCurrentSlot();
-	UI_UpdateSysControls();
 }
 
 void MainEmuFrame::Menu_LoadStateOther_Click(wxCommandEvent &event)

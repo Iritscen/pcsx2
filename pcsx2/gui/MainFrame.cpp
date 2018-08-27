@@ -28,6 +28,7 @@
 #include "AppAccelerators.h"
 
 #include "svnrev.h"
+#include "Saveslots.h"
 
 // ------------------------------------------------------------------------
 wxMenu* MainEmuFrame::MakeStatesSubMenu( int baseid, int loadBackupId ) const
@@ -38,6 +39,11 @@ wxMenu* MainEmuFrame::MakeStatesSubMenu( int baseid, int loadBackupId ) const
 	{
 		// Will be changed once an iso is loaded.
 		mnuSubstates->Append(baseid + i + 1, wxsFormat(_("Slot %d"), i));
+
+		if (baseid == MenuId_State_Load01) 
+		{
+			saveslot_cache[i].slot_num = i;
+		}
 	}
 
 	if (loadBackupId >= 0)
