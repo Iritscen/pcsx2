@@ -85,10 +85,12 @@ public:
             Console.WriteLn("Slot cache says it is empty.");
         else
             Console.WriteLn("Slot cache says it is used.");
-        Console.WriteLn("Write time is %s %s.", updated.FormatDate(), updated.FormatTime());
+
+        if (updated != wxInvalidDateTime)
+            Console.WriteLn(wxsFormat(_("Write time is %s %s."), updated.FormatDate(), updated.FormatTime()));
 
         if (isUsed())
-            Console.WriteLn("The disk has a file on it dated %s %s.", GetTimestamp().FormatDate(), GetTimestamp().FormatTime());
+            Console.WriteLn(wxsFormat(_("(The disk has a file on it dated %s %s."), GetTimestamp().FormatDate(), GetTimestamp().FormatTime()));
     }
 };
 
