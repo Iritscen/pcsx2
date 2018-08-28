@@ -215,11 +215,14 @@ wxWindowID SwapOrReset_CdvdSrc( wxWindow* owner, CDVD_SourceType newsrc )
 		sMainFrame.UpdateIsoSrcSelection();
 		core.AllowResume();
 		Saveslots_UpdateFromDisk();
+		UI_UpdateSysControls();
 	}
 	else
 	{
 		core.DisallowResume();
 		sApp.SysExecute( g_Conf->CdvdSource );
+		Saveslots_UpdateFromDisk();
+		UI_UpdateSysControls();
 	}
 
 	GetMainFrame().EnableCdvdPluginSubmenu( g_Conf->CdvdSource == CDVD_SourceType::Plugin );
@@ -359,6 +362,9 @@ void MainEmuFrame::_DoBootCdvd()
 	}
 
 	sApp.SysExecute( g_Conf->CdvdSource );
+	Saveslots_UpdateFromDisk();
+	UI_UpdateSysControls();
+	Console.WriteLn(wxsFormat(_("Do Boot Cdvd. crc = %i "), ElfCRC));
 }
 
 void MainEmuFrame::EnableCdvdPluginSubmenu(bool isEnable)

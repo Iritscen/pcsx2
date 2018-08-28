@@ -27,11 +27,11 @@ class Saveslot
 {
 protected:
 public:
-    int slot_num;
+    u32 slot_num;
     bool empty;
     wxDateTime updated;
     wxString note;
-    int crc;
+    u32 crc;
 
     Saveslot()
     {
@@ -77,6 +77,21 @@ public:
         crc = ElfCRC;
     }
 
+    __forceinline wxString SlotName()
+    {
+        if (empty)
+        {
+            return wxsFormat(_("Slot %d - Empty"), slot_num);
+        }
+        else
+        {
+            if (updated != wxInvalidDateTime)
+                return wxsFormat(_("Slot %d - %s %s"), slot_num, updated.FormatDate(), updated.FormatTime());
+            else
+                return wxsFormat(_("Slot %d - Unknown Time"), slot_num);
+        }
+    }
+
     __forceinline void ConsoleDump()
     {
         Console.WriteLn("Slot %i information:", slot_num);
@@ -90,7 +105,7 @@ public:
             Console.WriteLn(wxsFormat(_("Write time is %s %s."), updated.FormatDate(), updated.FormatTime()));
 
         if (isUsed())
-            Console.WriteLn(wxsFormat(_("(The disk has a file on it dated %s %s."), GetTimestamp().FormatDate(), GetTimestamp().FormatTime()));
+            Console.WriteLn(wxsFormat(_("The disk has a file on it dated %s %s."), GetTimestamp().FormatDate(), GetTimestamp().FormatTime()));
     }
 };
 

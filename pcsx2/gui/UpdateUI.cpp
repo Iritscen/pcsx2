@@ -57,21 +57,16 @@ static void _SaveLoadStuff(bool enabled)
 			// so it might not be written yet. Which is why I cache to begin with. 
             if (saveslot_cache[i].isUsed() || (saveslot_cache[i].crc != ElfCRC)) 
 			{
-                //Console.WriteLn("Update!");
+                Console.WriteLn("Update!");
                 saveslot_cache[i].UpdateCache();
-                //saveslot_cache[i].ConsoleDump();
+                saveslot_cache[i].ConsoleDump();
             }
         }
 
         sMainFrame.EnableMenuItem(load_menu_item, !saveslot_cache[i].empty);
 
-        if (!saveslot_cache[i].empty) {
-            sMainFrame.SetMenuItemLabel(load_menu_item, wxsFormat(_("Slot %d - %s %s"), i, saveslot_cache[i].updated.FormatDate(), saveslot_cache[i].updated.FormatTime()));
-            sMainFrame.SetMenuItemLabel(save_menu_item, wxsFormat(_("Slot %d - %s %s"), i, saveslot_cache[i].updated.FormatDate(), saveslot_cache[i].updated.FormatTime()));
-        } else {
-            sMainFrame.SetMenuItemLabel(load_menu_item, wxsFormat(_("Slot %d - Empty"), i));
-            sMainFrame.SetMenuItemLabel(save_menu_item, wxsFormat(_("Slot %d - Empty"), i));
-        }
+        sMainFrame.SetMenuItemLabel(load_menu_item, saveslot_cache[i].SlotName());
+        sMainFrame.SetMenuItemLabel(save_menu_item, saveslot_cache[i].SlotName());
     }
 }
 
@@ -79,7 +74,7 @@ static void _SaveLoadStuff(bool enabled)
 // etc.  Typically called by SysEvtHandler whenever the message pump becomes idle.
 void UI_UpdateSysControls()
 {
-    //Console.WriteLn("UI_UpdateSysControls entered!");
+    Console.WriteLn("UI_UpdateSysControls entered!");
     if (wxGetApp().Rpc_TryInvokeAsync(&UI_UpdateSysControls))
         return;
 
@@ -87,7 +82,7 @@ void UI_UpdateSysControls()
 
     //_SaveLoadStuff( true );
     _SaveLoadStuff(SysHasValidState());
-    //Console.WriteLn("UI_UpdateSysControls done!");
+    Console.WriteLn("UI_UpdateSysControls done!");
 }
 
 void UI_DisableSysShutdown()
