@@ -53,6 +53,7 @@ protected:
     void InvokeEvent()
     {
         IsSavingOrLoading = false;
+        UI_UpdateSysControls();
     }
 };
 
@@ -87,7 +88,6 @@ void States_FreezeCurrentSlot()
     saveslot_cache[StatesC].empty = false;
     saveslot_cache[StatesC].updated = wxDateTime::Now();
     saveslot_cache[StatesC].crc = ElfCRC;
-    UI_UpdateSysControls();
 
     GetSysExecutorThread().PostIdleEvent(SysExecEvent_ClearSavingLoadingFlag());
 }
@@ -110,7 +110,6 @@ void _States_DefrostCurrentSlot(bool isFromBackup)
     GetSysExecutorThread().PostIdleEvent(SysExecEvent_ClearSavingLoadingFlag());
 
     Sstates_updateLoadBackupMenuItem();
-    UI_UpdateSysControls();
 }
 
 void States_DefrostCurrentSlot()

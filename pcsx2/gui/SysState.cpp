@@ -476,6 +476,7 @@ protected:
 
 	void CleanupEvent()
 	{
+		UI_UpdateSysControls();
 	}
 };
 
